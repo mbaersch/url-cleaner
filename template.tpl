@@ -1,4 +1,4 @@
-﻿___TERMS_OF_SERVICE___
+___TERMS_OF_SERVICE___
 
 By creating or modifying this file you agree to Google Tag Manager's Community
 Template Gallery Developer Terms of Service available at
@@ -17,7 +17,7 @@ ___INFO___
   "categories": [
     "UTILITY"
   ],
-  "description": "parses URLs and keeps only whitelisted parameters. Reurns new full url, path or redacted query string only.",
+  "description": "parses URLs and keeps only whitelisted parameters. Reurns new full url, path or redacted query string only (optionalyl transformed to lower case)",
   "containerContexts": [
     "WEB"
   ]
@@ -38,6 +38,82 @@ ___TEMPLATE_PARAMETERS___
       }
     ],
     "alwaysInSummary": true
+  },
+  {
+    "type": "GROUP",
+    "name": "grpWhitelist",
+    "displayName": "Parameter Whitelist",
+    "groupStyle": "NO_ZIPPY",
+    "subParams": [
+      {
+        "type": "LABEL",
+        "name": "infoWhitelist",
+        "displayName": "Add all desired parameter names as separate rows. All other parameters will be removed."
+      },
+      {
+        "type": "SIMPLE_TABLE",
+        "name": "whitelistParams",
+        "displayName": "Parameter Whitelist Table",
+        "simpleTableColumns": [
+          {
+            "defaultValue": "",
+            "displayName": "",
+            "name": "paramName",
+            "type": "TEXT"
+          }
+        ],
+        "help": ""
+      }
+    ]
+  },
+  {
+    "type": "CHECKBOX",
+    "name": "lowercaseUrl",
+    "checkboxText": "Change To Lowercase",
+    "simpleValueType": true,
+    "help": "Check this option to change the result to lowercase characters. Note: modification happens after whitelisting and application of RegEx filters. This means that both functions will be case-sensitive."
+  },
+  {
+    "type": "CHECKBOX",
+    "name": "redactValues",
+    "checkboxText": "Redact Values",
+    "simpleValueType": true,
+    "alwaysInSummary": false,
+    "help": "Optional redaction of remaining parameter values with regex patterns."
+  },
+  {
+    "type": "GROUP",
+    "name": "grpRegex",
+    "displayName": "Regex List",
+    "groupStyle": "NO_ZIPPY",
+    "subParams": [
+      {
+        "type": "LABEL",
+        "name": "infoRegex",
+        "displayName": "Add one or multiple rows with regex expressions to apply to all remaining parameter values. Matching strings will be replaced with [REDACTED]."
+      },
+      {
+        "type": "SIMPLE_TABLE",
+        "name": "redactPatterns",
+        "displayName": "",
+        "simpleTableColumns": [
+          {
+            "defaultValue": "",
+            "displayName": "Regex Pattern",
+            "name": "rgx",
+            "type": "TEXT"
+          }
+        ],
+        "help": "Example for email addresses: [a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+"
+      }
+    ],
+    "enablingConditions": [
+      {
+        "paramName": "redactValues",
+        "paramValue": true,
+        "type": "EQUALS"
+      }
+    ]
   },
   {
     "type": "SELECT",
@@ -66,49 +142,6 @@ ___TEMPLATE_PARAMETERS___
       }
     ],
     "alwaysInSummary": true
-  },
-  {
-    "type": "SIMPLE_TABLE",
-    "name": "whitelistParams",
-    "displayName": "Parameter Whitelist Table",
-    "simpleTableColumns": [
-      {
-        "defaultValue": "",
-        "displayName": "Parameter Name",
-        "name": "paramName",
-        "type": "TEXT"
-      }
-    ],
-    "help": "add rows for every parameter name that should be preserved (case insensitive). All other parameters will be deleted."
-  },
-  {
-    "type": "CHECKBOX",
-    "name": "redactValues",
-    "checkboxText": "Redact Values",
-    "simpleValueType": true,
-    "alwaysInSummary": true,
-    "help": "Optional redaction of remaining parameter values with regex patterns."
-  },
-  {
-    "type": "SIMPLE_TABLE",
-    "name": "redactPatterns",
-    "displayName": "Redaction Regex Pattern Table",
-    "simpleTableColumns": [
-      {
-        "defaultValue": "",
-        "displayName": "Regex",
-        "name": "rgx",
-        "type": "TEXT"
-      }
-    ],
-    "help": "matching strings in values will be replaced with [REDACTED]. Example for email addresses: [a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+",
-    "enablingConditions": [
-      {
-        "paramName": "redactValues",
-        "paramValue": true,
-        "type": "EQUALS"
-      }
-    ]
   }
 ]
 
@@ -138,12 +171,20 @@ for(var prm of Object.entries(sp)) {
   }
 }
 
+var hst = inUrl.hostname;
+var pth = inUrl.pathname;
 var cleanQuery = cleanParams.join('&');
 if (cleanQuery.length > 0) cleanQuery = '?' + cleanQuery;
 
+if (data.lowercaseUrl) {
+  hst = hst.toLowerCase();
+  pth = pth.toLowerCase();
+  cleanQuery = cleanQuery.toLowerCase();
+}
+
 if (data.resultFormat === "paramsOnly") return cleanQuery;
-if (data.resultFormat === "pageOnly") return inUrl.pathname + cleanQuery;
-return inUrl.protocol + "//" + inUrl.hostname + inUrl.pathname + cleanQuery;
+if (data.resultFormat === "pageOnly") return pth + cleanQuery;
+return inUrl.protocol + "//" + hst + pth + cleanQuery;
 
 
 ___TESTS___
