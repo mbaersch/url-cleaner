@@ -17,7 +17,7 @@ ___INFO___
   "categories": [
     "UTILITY"
   ],
-  "description": "parses URLs and keeps only whitelisted or removes blacklisted parameters. Reurns new full url, path or redacted query string only (optionalyl transformed to lower case)",
+  "description": "parses URLs and keeps only whitelisted or removes blacklisted parameters. Reurns new full url, path or redacted query string only (optionally transformed to lower case)",
   "containerContexts": [
     "WEB"
   ]
