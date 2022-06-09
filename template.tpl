@@ -17,7 +17,7 @@ ___INFO___
   "categories": [
     "UTILITY"
   ],
-  "description": "parses URLs and keeps only whitelisted parameters. Reurns new full url, path or redacted query string only (optionalyl transformed to lower case)",
+  "description": "parses URLs and keeps only whitelisted or removes blacklisted parameters. Reurns new full url, path or redacted query string only (optionalyl transformed to lower case)",
   "containerContexts": [
     "WEB"
   ]
@@ -32,6 +32,31 @@ ___TEMPLATE_PARAMETERS___
     "name": "fullUrl",
     "displayName": "Full URL",
     "simpleValueType": true,
+    "valueValidators": [
+      {
+        "type": "NON_EMPTY"
+      }
+    ],
+    "alwaysInSummary": true
+  },
+  {
+    "type": "SELECT",
+    "name": "listMethod",
+    "displayName": "List Method",
+    "macrosInSelect": false,
+    "selectItems": [
+      {
+        "value": "whitelist",
+        "displayValue": "Whitelist"
+      },
+      {
+        "value": "blacklist",
+        "displayValue": "Blacklist"
+      }
+    ],
+    "simpleValueType": true,
+    "defaultValue": "whitelist",
+    "help": "Switch between parameter whitelisting (all parameters are removed if not listed) or blacklisting (only listed parameters are removed).",
     "valueValidators": [
       {
         "type": "NON_EMPTY"
@@ -64,12 +89,53 @@ ___TEMPLATE_PARAMETERS___
         ],
         "help": ""
       }
+    ],
+    "enablingConditions": [
+      {
+        "paramName": "listMethod",
+        "paramValue": "whitelist",
+        "type": "EQUALS"
+      }
+    ]
+  },
+  {
+    "type": "GROUP",
+    "name": "grpBlacklist",
+    "displayName": "Parameter Blacklist",
+    "groupStyle": "NO_ZIPPY",
+    "subParams": [
+      {
+        "type": "LABEL",
+        "name": "infoBlacklist",
+        "displayName": "Add all parameter names that should be removed from the URL as separate rows. All other parameters will be preserved."
+      },
+      {
+        "type": "SIMPLE_TABLE",
+        "name": "blacklistParams",
+        "displayName": "Parameter Whitelist Table",
+        "simpleTableColumns": [
+          {
+            "defaultValue": "",
+            "displayName": "",
+            "name": "paramName",
+            "type": "TEXT"
+          }
+        ],
+        "help": ""
+      }
+    ],
+    "enablingConditions": [
+      {
+        "paramName": "listMethod",
+        "paramValue": "blacklist",
+        "type": "EQUALS"
+      }
     ]
   },
   {
     "type": "CHECKBOX",
     "name": "lowercaseUrl",
-    "checkboxText": "Change To Lowercase",
+    "checkboxText": "Transform To Lowercase",
     "simpleValueType": true,
     "help": "Check this option to change the result to lowercase characters. Note: modification happens after whitelisting and application of RegEx filters. This means that both functions will be case-sensitive."
   },
@@ -95,16 +161,29 @@ ___TEMPLATE_PARAMETERS___
       {
         "type": "SIMPLE_TABLE",
         "name": "redactPatterns",
-        "displayName": "",
+        "displayName": "Regex Pattern",
         "simpleTableColumns": [
           {
             "defaultValue": "",
-            "displayName": "Regex Pattern",
+            "displayName": "",
             "name": "rgx",
             "type": "TEXT"
           }
         ],
         "help": "Example for email addresses: [a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+"
+      },
+      {
+        "type": "TEXT",
+        "name": "redactReplacement",
+        "displayName": "Replacement String",
+        "simpleValueType": true,
+        "defaultValue": "[REDACTED]",
+        "valueValidators": [
+          {
+            "type": "NON_EMPTY"
+          }
+        ],
+        "help": "Enter string to replace all matches with regex expressions."
       }
     ],
     "enablingConditions": [
@@ -151,7 +230,9 @@ ___SANDBOXED_JS_FOR_WEB_TEMPLATE___
 var Object = require("Object");
 var parseUrl = require("parseUrl");
 
-var wList = data.whitelistParams ? data.whitelistParams.map(function(item){return item.paramName.toLowerCase();}) : [];
+var lm = data.listMethod || "whitelist";
+var wList = (lm === "whitelist") && data.whitelistParams ? data.whitelistParams.map(function(item){return item.paramName.toLowerCase();}) : [];
+var bList = (lm === "blacklist") && data.blacklistParams ? data.blacklistParams.map(function(item){return item.paramName.toLowerCase();}) : [];
 
 var inUrl = parseUrl(data.fullUrl);
 const sp = inUrl.searchParams;
@@ -160,11 +241,12 @@ var cleanParams = [];
 for(var prm of Object.entries(sp)) {
   var k = prm[0] || "";
   var vl = prm.length > 1 ? prm[1] : "";
-  if (wList.indexOf(k.toLowerCase()) >= 0) { 
+  var keepParam = lm === "whitelist" ? wList.indexOf(k.toLowerCase()) >= 0 : bList.indexOf(k.toLowerCase()) < 0; 
+  if (keepParam === true) { 
     if (data.redactValues === true && data.redactPatterns && data.redactPatterns.length > 0) {
       data.redactPatterns.forEach(pat => {
         const redactInfo = vl.match(pat.rgx);
-        if(redactInfo) vl = vl.replace(redactInfo,'[REDACTED]');      
+        if(redactInfo) vl = vl.replace(redactInfo, data.redactReplacement);      
       });
     }
     cleanParams.push(prm[0]+"="+vl);
@@ -176,7 +258,7 @@ var pth = inUrl.pathname;
 var cleanQuery = cleanParams.join('&');
 if (cleanQuery.length > 0) cleanQuery = '?' + cleanQuery;
 
-if (data.lowercaseUrl) {
+if (data.lowercaseUrl === true) {
   hst = hst.toLowerCase();
   pth = pth.toLowerCase();
   cleanQuery = cleanQuery.toLowerCase();
@@ -189,7 +271,45 @@ return inUrl.protocol + "//" + hst + pth + cleanQuery;
 
 ___TESTS___
 
-scenarios: []
+scenarios:
+- name: Whitelist, Full URL, lowercase
+  code: |-
+    mockData.whitelistParams = [{paramName: "utm_source"}, {paramName: "utm_medium"}];
+    mockData.lowercaseUrl = true;
+
+    let variableResult = runCode(mockData);
+    assertThat(variableResult).isEqualTo("https://www.example.com/page.html?utm_medium=test&utm_source=check");
+- name: Blacklist, Page Only
+  code: |-
+    mockData.blacklistParams = [{paramName: "foo"}, {paramName: "fbclid"}];
+    mockData.listMethod = "blacklist";
+    mockData.resultFormat = "pageOnly";
+
+    let variableResult = runCode(mockData);
+    assertThat(variableResult).isEqualTo("/page.html?utm_medium=test&utm_source=check&RANDOM=email@example.com");
+- name: Blacklist, Params Only, Redacted Email
+  code: |-
+    mockData.blacklistParams = [{paramName: "foo"}, {paramName: "fbclid"}];
+    //sorry... but more complex patterns break tests (but work in preview and live)
+    const rp = [{rgx:'email@example.com'}];
+    mockData.redactValues = true;
+    mockData.redactPatterns = rp;
+
+    mockData.lowercaseUrl = true;
+    mockData.listMethod = "blacklist";
+    mockData.resultFormat = "paramsOnly";
+
+    let variableResult = runCode(mockData);
+    assertThat(variableResult).isEqualTo("?utm_medium=test&utm_source=check&random=[gone]");
+setup: |
+  const mockData = {
+    fullUrl: "https://WWW.example.com/page.html?utm_medium=test&utm_source=check&fbclid=something&foo=bar&RANDOM=email@example.com",
+    listMethod: "whitelist",
+    lowercaseUrl: false,
+    redactValues: false,
+    redactReplacement: "[gone]",
+    resultFormat: "cleanUrl"
+  };
 
 
 ___NOTES___
