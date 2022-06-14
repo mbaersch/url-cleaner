@@ -1,11 +1,9 @@
 homepage: "https://www.markus-baersch.de"
 versions:
-  # Latest version
-  - sha: d2b27e3937f14fb264faa518009de6b48f48a3b2
-    changeNotes: fixed typo in description.  
+  # Latest version   
+  - sha: 6a9b159b53d598d37a671057f8d9698a3f03ac2f
+    changeNotes: added regex and partial match for list items.
   # Older versions
-  - sha: 7ab01f6170c95854bae468bcec4ed6322dea0760
-    changeNotes: fix lowercase option, added optional blacklist.  
   - sha: bf81fa3c325ecd4b552370f99b77ed1d879033b4
     changeNotes: added lowercase option.
   - sha: 626d519503ef221091f2494d7c17fb7329011ecd
