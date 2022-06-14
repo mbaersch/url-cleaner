@@ -65,6 +65,13 @@ ___TEMPLATE_PARAMETERS___
     "alwaysInSummary": true
   },
   {
+    "type": "CHECKBOX",
+    "name": "useRegex",
+    "checkboxText": "Allow Partial Match And RegEx",
+    "simpleValueType": true,
+    "help": "Check to use partial match (\"utm_\" would catch \"utm_medium\" and \"utm_source\" as well as \"autm_tk\") or regular expressions in your list.\n\nIf not active, parameters must match a list entry (not case-sensitive)."
+  },
+  {
     "type": "GROUP",
     "name": "grpWhitelist",
     "displayName": "Parameter Whitelist",
@@ -241,7 +248,12 @@ var cleanParams = [];
 for(var prm of Object.entries(sp)) {
   var k = prm[0] || "";
   var vl = prm.length > 1 ? prm[1] : "";
-  var keepParam = lm === "whitelist" ? wList.indexOf(k.toLowerCase()) >= 0 : bList.indexOf(k.toLowerCase()) < 0; 
+  var keepParam = 
+      lm === "whitelist" ? 
+        (data.useRegex ? wList.some(function(pat) {return k.match(pat);}) : ( wList.indexOf(k.toLowerCase()) >= 0)) 
+      : 
+        (data.useRegex ? !bList.some(function(pat) {return k.match(pat);}) : ( bList.indexOf(k.toLowerCase()) < 0)); 
+  
   if (keepParam === true) { 
     if (data.redactValues === true && data.redactPatterns && data.redactPatterns.length > 0) {
       data.redactPatterns.forEach(pat => {
@@ -301,7 +313,33 @@ scenarios:
 
     let variableResult = runCode(mockData);
     assertThat(variableResult).isEqualTo("?utm_medium=test&utm_source=check&random=[gone]");
-setup: |
+- name: Whitelist, Regex List Items
+  code: |-
+    mockData.whitelistParams = [{paramName: "utm_"}, {paramName: "fo+"}];
+    mockData.lowercaseUrl = true;
+    mockData.useRegex = true;
+
+    let variableResult = runCode(mockData);
+    assertThat(variableResult).isEqualTo("https://www.example.com/page.html?utm_medium=test&utm_source=check&foo=bar");
+- name: Blacklist, Regex List Items
+  code: |-
+    mockData.fullUrl = "https://www.example.com/page.html?utm_medium=test&utm_source=check&autm_tk=check2&fbclid=something&foo=bar";
+    mockData.blacklistParams = [{paramName: "utm_"}, {paramName: "fop"}];
+    mockData.listMethod = "blacklist";
+    mockData.useRegex = true;
+
+    let variableResult = runCode(mockData);
+    assertThat(variableResult).isEqualTo("https://www.example.com/page.html?fbclid=something&foo=bar");
+- name: Blacklist, Better Regex
+  code: |-
+    mockData.fullUrl = "https://www.example.com/page.html?utm_medium=test&utm_source=check&autm_tk=check2&fbclid=something&foo=bar";
+    mockData.blacklistParams = [{paramName: "^utm_.+"},];
+    mockData.listMethod = "blacklist";
+    mockData.useRegex = true;
+
+    let variableResult = runCode(mockData);
+    assertThat(variableResult).isEqualTo("https://www.example.com/page.html?autm_tk=check2&fbclid=something&foo=bar");
+setup: |-
   const mockData = {
     fullUrl: "https://WWW.example.com/page.html?utm_medium=test&utm_source=check&fbclid=something&foo=bar&RANDOM=email@example.com",
     listMethod: "whitelist",
