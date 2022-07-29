@@ -1,9 +1,12 @@
 homepage: "https://www.markus-baersch.de"
+documentation: "https://github.com/mbaersch/url-cleaner#readme"
 versions:
   # Latest version   
+  - sha: 264241c533a3a37bde0654e9e2878faf72bbc4ef
+    changeNotes: UI fix (no functional changes)
+  # Older versions
   - sha: 6a9b159b53d598d37a671057f8d9698a3f03ac2f
     changeNotes: added regex and partial match for list items.
-  # Older versions
   - sha: bf81fa3c325ecd4b552370f99b77ed1d879033b4
     changeNotes: added lowercase option.
   - sha: 626d519503ef221091f2494d7c17fb7329011ecd
