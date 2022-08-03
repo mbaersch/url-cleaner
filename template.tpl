@@ -258,7 +258,12 @@ for(var prm of Object.entries(sp)) {
     if (data.redactValues === true && data.redactPatterns && data.redactPatterns.length > 0) {
       data.redactPatterns.forEach(pat => {
         const redactInfo = vl.match(pat.rgx);
-        if(redactInfo) vl = vl.replace(redactInfo, data.redactReplacement);      
+        if(redactInfo) vl = vl.replace(redactInfo, data.redactReplacement);
+        else 
+          if ((pat.rgx.substring(0,2) === "%%") && 
+              (pat.rgx.substring(pat.rgx.length-2) === "%%") && 
+              ("%%" + k.toLowerCase() + "%%"  === pat.rgx))
+            vl = data.redactReplacement;                     
       });
     }
     cleanParams.push(prm[0]+"="+vl);
@@ -353,5 +358,4 @@ setup: |-
 ___NOTES___
 
 Created on 4.5.2022, 21:23:46
-
 
