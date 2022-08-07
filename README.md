@@ -26,6 +26,7 @@ if you use `^find$` instead, the result will only delete the first parameter and
 `https://www.test.com/?foo=1&bar=0&find2=keep`    
 
 ### Special Functions
+#### Radacting Parameters Without Removing
 If you want to redact parameters without removing them (for controlling purposes or other reasons), you can use the "Redact Parameters" option and define a parameter name instead of a regex. In this case, the template does not match the list entry as RegEx against the values but compares any list entry with parameter names, when a special format is used. 
 
 In order to use this, add parameter names in the following format to the list: 
@@ -33,3 +34,6 @@ In order to use this, add parameter names in the following format to the list:
 `%%parametername%%`
 
 By surrounding a parameter name with double "%" signs, any matching `parametername` in the URL will be kept in the result, but the value gets replaced with the defined text just as if a normal RegEx had matched the parameter value. Note: this option works case insensitive, so `%%something%%` would catch "Something" as well as "something", "someThing" or any other format. There must be a complete match (no RegEx or partial match here).  
+
+#### Using Comma-separated List Items
+You can define multiple comma-separated values like `param1, param2, param3` in one list entry instead of creating three separate list items for black- and whitelists. This allows dynamic definition of blacklists in a separate variable that uses different sets of list items for different consent conditions. 
