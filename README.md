@@ -1,5 +1,12 @@
-# URL Cleaner (url-cleaner)
-Google Tag Manager Custom Variable Template for URL cleanup with black- or whitelisting for parameters and optional value redaction with regexes 
+# URL Cleaner 
+
+**Custom Variable Template for Google Tag Manager**
+
+URL cleanup with black- or whitelisting for parameters and optional value redaction with regexes 
+
+[![Template Status](https://img.shields.io/badge/Community%20Template%20Gallery%20Status-published-green)](https://tagmanager.google.com/gallery/#/owners/mbaersch/templates/url-cleaner) ![Repo Size](https://img.shields.io/github/repo-size/mbaersch/url-cleaner) ![License](https://img.shields.io/github/license/mbaersch/url-cleaner)
+
+---
 
 **Note**: this template does not need any permissions. 
 
