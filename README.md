@@ -13,6 +13,11 @@ URL cleanup with black- or whitelisting for parameters and optional value redact
 ## Usage
 - define any URL as input value. Select **"Whitelist"** and define a set of allowed variables. All other parameters and their values will be eliminated from the URL query string. Alternatively a **"Blacklist"** can be defined in the same way. In this case, only blacklisted parameters are removed.  
 
+### Update: Redact Path 
+In June 2023 a third option *"Redact Path"* was added. You can use it to remove certain paths from URLs if they match any of the patterns or search terms privided in the redaction list. 
+
+**Tip**: If picked, there will be no additional adjustment of parameters. If you need to change both path and parameters, use result of a first URL Cleaner as input for a second one.  
+
 - The remaining parameter values can optionally be checked and redacted by using one or more **regex expressions**. 
 
 - if you want to **lowercase** the result, check the option in the variable settings (default is "off")

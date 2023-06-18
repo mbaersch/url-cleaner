@@ -2,9 +2,11 @@ homepage: "https://www.markus-baersch.de"
 documentation: "https://github.com/mbaersch/url-cleaner#readme"
 versions:
   # Latest version
+  - sha: xxxxx
+    changeNotes: added new option "Redact Path" 
+  # Older versions
   - sha: a833478dd562793af3d78e548213f953f60ad830
     changeNotes: enabled use of comma-separated lists of parameter names in a single list item for black- and whitelists
-  # Older versions
   - sha: 8bb2c2d82111ac17923e906234f01d59908ee17b
     changeNotes: added special matching option for parameter names in redaction feature
   - sha: 264241c533a3a37bde0654e9e2878faf72bbc4ef
