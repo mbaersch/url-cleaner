@@ -14,9 +14,12 @@ ___INFO___
   "version": 1,
   "securityGroups": [],
   "displayName": "URL Cleaner",
+  "categories": [
+    "UTILITY"
+  ],  
   "description": "parses URLs and keeps only whitelisted or removes blacklisted parameters. Returns new full url, path or redacted query string only (optionally transformed to lower case)",
   "containerContexts": [
-    "SERVER"
+    "WEB"
   ]
 }
 
@@ -252,7 +255,7 @@ ___TEMPLATE_PARAMETERS___
 ]
 
 
-___SANDBOXED_JS_FOR_SERVER___
+___SANDBOXED_JS_FOR_WEB_TEMPLATE___
 
 var Object = require("Object");
 var parseUrl = require("parseUrl");
@@ -435,5 +438,5 @@ setup: |-
 
 ___NOTES___
 
-Created on 12.6.2022, 18:33:14
+Created on 4.5.2022, 21:23:46
 
