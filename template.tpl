@@ -310,9 +310,9 @@ if (lm === "path") {
     var vl = prm.length > 1 ? prm[1] : "";
     var keepParam = 
         lm === "whitelist" ? 
-          (data.useRegex ? wList.some(function(pat) {return k.match(pat);}) : (   wList.indexOf(k.toLowerCase()) >= 0)) 
+          (data.useRegex ? wList.some(function(pat) {return k.match(pat);}) : (   wList.indexOf(k) >= 0)) 
         : 
-          (data.useRegex ? !bList.some(function(pat) {return k.match(pat);}) : ( bList.indexOf(k.toLowerCase()) < 0)); 
+          (data.useRegex ? !bList.some(function(pat) {return k.match(pat);}) : ( bList.indexOf(k) < 0)); 
   
     if (keepParam === true) { 
       if (data.redactValues === true && data.redactPatterns && data.redactPatterns.length > 0) {
