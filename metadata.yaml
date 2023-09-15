@@ -2,9 +2,11 @@ homepage: "https://www.markus-baersch.de"
 documentation: "https://github.com/mbaersch/url-cleaner#readme"
 versions:
   # Latest version
+  - sha: bbcdb285f9832c6c15910548c0b0eaf38fd0ad64
+    changeNotes: fixed case sensitivity for param names
+  # Older versions
   - sha: dd6733a4df998b01bf954a09d21fc1d1e7ed6899
     changeNotes: fixed template (picked wrong version - sorry!) 
-  # Older versions
   - sha: 5262e33ca7651924c0dc6c90f56be69e6cd307de
     changeNotes: added new option "Redact Path" 
   - sha: a833478dd562793af3d78e548213f953f60ad830
